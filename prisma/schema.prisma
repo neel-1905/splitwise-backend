@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  authAccounts AuthAccount[]
+}
+
+model AuthAccount {
+  id                String       @id @default(uuid())
+  provider          AuthProvider
+  providerAccountId String
+  passwordHash      String?
+  createdAt         DateTime     @default(now())
+  userId            String?
+  user              User?        @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+}
