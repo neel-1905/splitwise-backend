@@ -9,5 +9,11 @@ router.post("/", authMiddleware, groupController.createGroup);
 router.get("/", authMiddleware, groupController.getUserGroups);
 router.get("/all", groupController.getAllGroups);
 router.get("/:id", authMiddleware, groupController.getGroup);
+router.post("/:groupId/members", authMiddleware, groupController.addMember);
+router.delete(
+  "/:groupId/members/:userId",
+  authMiddleware,
+  groupController.removeMember,
+);
 
 export default router;
