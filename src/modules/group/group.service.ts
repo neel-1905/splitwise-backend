@@ -81,3 +81,76 @@ export const getGroup = async (id: string, userId: string) => {
 
   return group;
 };
+
+export const addGroupMember = async (
+  groupId: string,
+  creatorId: string,
+  userId: string,
+) => {
+  const group = await prisma.group.findFirst({
+    where: {
+      id: groupId,
+      createdById: creatorId,
+    },
+  });
+
+  if (!group) throw new Error("Group not found");
+
+  const existingMember = await prisma.groupMember.findFirst({
+    where: {
+      userId,
+      groupId,
+    },
+  });
+
+  if (existingMember) throw new Error("User is already a part of the group");
+
+  const member = await prisma.groupMember.create({
+    data: {
+      groupId,
+      userId,
+    },
+  });
+
+  return member;
+};
+
+export const removeMember = async (
+  groupId: string,
+  creatorId: string,
+  userId: string,
+) => {
+  const group = await prisma.group.findFirst({
+    where: {
+      id: groupId,
+      createdById: creatorId,
+    },
+  });
+
+  if (!group) {
+    throw new Error("Unauthorized");
+  }
+
+  const member = await prisma.groupMember.findFirst({
+    where: {
+      groupId,
+      userId,
+    },
+  });
+
+  if (!member) {
+    throw new Error("Member not found");
+  }
+
+  if (group.createdById === userId) {
+    throw new Error("Creator cannot be removed");
+  }
+
+  await prisma.groupMember.delete({
+    where: {
+      id: member.id,
+    },
+  });
+
+  return true;
+};
