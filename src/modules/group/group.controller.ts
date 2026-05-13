@@ -105,3 +105,20 @@ export const removeMember = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteGroup = async (req: Request, res: Response) => {
+  try {
+    await groupService.deleteGroup(
+      req.params.groupId as string,
+      req.user.userId,
+    );
+
+    res.status(200).json({
+      message: "Group deleted",
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      error: error.message,
+    });
+  }
+};
