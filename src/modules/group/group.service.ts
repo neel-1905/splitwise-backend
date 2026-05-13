@@ -22,6 +22,25 @@ export const createGroup = async (name: string, userId: string) => {
   return group;
 };
 
+export const deleteGroup = async (groupId: string, creatorId: string) => {
+  const group = await prisma.group.findFirst({
+    where: {
+      id: groupId,
+      createdById: creatorId,
+    },
+  });
+
+  if (!group) throw new Error("Unauthorized");
+
+  await prisma.group.delete({
+    where: {
+      id: groupId,
+    },
+  });
+
+  return true;
+};
+
 export const getUserGroups = async (userId: string) => {
   const groups = await prisma.group.findMany({
     where: {
