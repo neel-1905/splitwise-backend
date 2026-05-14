@@ -8,15 +8,25 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  name          String
-  avatarUrl     String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  authAccounts  AuthAccount[]
-  createdGroups Group[]       @relation("CreatedGroups")
-  groupMembers  GroupMember[]
+  id String @id @default(uuid())
+
+  email String @unique
+  name  String
+
+  avatarUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authAccounts AuthAccount[]
+
+  createdGroups Group[] @relation("CreatedGroups")
+
+  groupMembers GroupMember[]
+
+  expensesPaid Expense[] @relation("PaidExpenses")
+
+  expenseSplits ExpenseSplit[] @relation("UserExpenseSplits")
 }
 
 model AuthAccount {
@@ -49,7 +59,8 @@ model Group {
 
   updatedAt DateTime @updatedAt
 
-  members GroupMember[]
+  members  GroupMember[]
+  expenses Expense[]
 }
 
 model GroupMember {
@@ -64,4 +75,38 @@ model GroupMember {
   joinedAt DateTime @default(now())
 
   @@unique([userId, groupId])
+}
+
+model Expense {
+  id String @id @default(uuid())
+
+  title String
+
+  amount Float
+
+  groupId String
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  paidById String
+
+  paidBy User @relation("PaidExpenses", fields: [paidById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  splits ExpenseSplit[]
+}
+
+model ExpenseSplit {
+  id String @id @default(uuid())
+
+  expenseId String
+
+  userId String
+
+  expense Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  user User @relation("UserExpenseSplits", fields: [userId], references: [id])
+
+  amount Float
 }
